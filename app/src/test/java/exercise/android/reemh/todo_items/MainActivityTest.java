@@ -74,6 +74,21 @@ public class MainActivityTest extends TestCase {
     //    TODO: implement the test.
     //     to set up the test, take a look at `when_userPutInputAndClicksButton_then_activityShouldCallAddItem()`
     //     to verify, use methods such as "assertEquals(...)" or "assertTrue(...)"
+    String userInput = "Call my grandma today at 18:00";
+    activityController.create().visible(); // let the activity think it is being shown
+    MainActivity activityUnderTest = activityController.get();
+    EditText editText = activityUnderTest.findViewById(R.id.editTextInsertTask);
+    View fab = activityUnderTest.findViewById(R.id.buttonCreateTodoItem);
+
+    // test - mock user interactions
+    editText.setText(userInput);
+    fab.performClick();
+
+    // verify: verify that `mockDataBase.addNewInProgressItem()` was called, with exactly same string
+    Mockito.verify(mockDataBase).addNewInProgressItem(eq(userInput));
+
+
+
   }
 
   @Test

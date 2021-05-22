@@ -1,12 +1,27 @@
 package exercise.android.reemh.todo_items;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.widget.TextView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-  public TodoItemsDataBase dataBase = null;
+  public TodoItemsDataBase dataBase;
+  BroadcastReceiver broadcastReceiver;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -16,11 +31,65 @@ public class MainActivity extends AppCompatActivity {
     if (dataBase == null) {
       dataBase = new TodoItemsDataBaseImpl();
     }
+    ItemAdapter itemAdapter = new ItemAdapter(this, this.dataBase);
+
+    TextView editTextView = findViewById(R.id.editTextInsertTask);
+    RecyclerView recyclerView = findViewById(R.id.recyclerTodoItemsList);
+    FloatingActionButton createTaskButton = findViewById(R.id.buttonCreateTodoItem);
+    recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+    recyclerView.setAdapter(itemAdapter);
+    editTextView.setText("");
+
+    createTaskButton.setOnClickListener(view ->
+    {
+      boolean is_pin = editTextView.getText().toString().length() > 0;
+      if(is_pin)
+      {
+        String description = editTextView.getText().toString();
+        this.dataBase.addNewInProgressItem(description);
+        editTextView.setText("");
+        itemAdapter.notifyDataSetChanged();
+      }
+    });
+    broadcastReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals("item_updated")) {
+        }
+      }
+
+    };
+    registerReceiver(broadcastReceiver, new IntentFilter("item_updated"));
+
 
     // TODO: implement the specs as defined below
     //    (find all UI components, hook them up, connect everything you need)
   }
+  @Override
+  protected void onStop() {
+    super.onStop();
+    List<TodoItem> todoItemsList=  new ArrayList<>();
+    todoItemsList=this.dataBase.getCurrentItems();
+  }
+
+  @Override
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putSerializable("dataBase", this.dataBase);
+  }
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    this.unregisterReceiver(broadcastReceiver);
+  }
+
+
+
 }
+
+
+
+
 
 /*
 
