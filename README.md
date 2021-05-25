@@ -68,4 +68,4 @@ an icon that will show the same option.
 it will be easy for users to figure out this flow, because it is written right next to the task.
 it will need to come with text view or image iew in the xml file, and add the accordingly functionality in the main activity,
 using the recycle view.
-it is seem to be consistent, having a button that shows an option to edit something. 
+it is seem to be consistent, having a button that shows an option to edit something.

@@ -43,6 +43,27 @@ public class TodoItemsDataBaseImpl implements TodoItemsDataBase {
     this.TodoItemsList.remove(item);
   }
 
+  @Override
+  public void change_item_state(TodoItem item_set) {
+    int time = 0;
+    for (int i = 0; i < this.TodoItemsList.size(); i++) {
+      int item_time = TodoItemsList.get(i).get_item_total_time();
+      if(time == item_set.get_item_total_time())
+      {
+        this.TodoItemsList.set(i, item_set);
+      }
+    }
+    ItemsComparator itemsComparator = new ItemsComparator();
+    Collections.sort(this.TodoItemsList, itemsComparator);
+
+
+  }
+
+  @Override
+  public void change_many_items_states(List<TodoItem> item_list) {
+    this.TodoItemsList = item_list;
+  }
+
   private TodoItem getItem(TodoItem to_do_item)
   {
     for(int i = 0; i < this.TodoItemsList.size(); i++)
@@ -54,4 +75,8 @@ public class TodoItemsDataBaseImpl implements TodoItemsDataBase {
     }
     return to_do_item;
   }
+
+
+
+
 }

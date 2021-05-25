@@ -24,4 +24,10 @@ public interface TodoItemsDataBase extends Serializable {
 
   /** delete the @param item */
   void deleteItem(TodoItem item);
+
+  /**change the state of an item */
+  void change_item_state(TodoItem item);
+
+  /**change few items state */
+  void change_many_items_states(List<TodoItem> item_list);
 }

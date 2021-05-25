@@ -6,21 +6,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
   public TodoItemsDataBase dataBase;
-  BroadcastReceiver broadcastReceiver;
+  RecyclerView recyclerView;
+  ItemAdapter itemAdapter;
 
 
   @Override
@@ -31,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
     if (dataBase == null) {
       dataBase = new TodoItemsDataBaseImpl();
     }
-    ItemAdapter itemAdapter = new ItemAdapter(this, this.dataBase);
+    itemAdapter = new ItemAdapter(this, this.dataBase);
 
     TextView editTextView = findViewById(R.id.editTextInsertTask);
-    RecyclerView recyclerView = findViewById(R.id.recyclerTodoItemsList);
+    recyclerView = findViewById(R.id.recyclerTodoItemsList);
     FloatingActionButton createTaskButton = findViewById(R.id.buttonCreateTodoItem);
     recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
     recyclerView.setAdapter(itemAdapter);
@@ -51,43 +50,77 @@ public class MainActivity extends AppCompatActivity {
         itemAdapter.notifyDataSetChanged();
       }
     });
-    broadcastReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("item_updated")) {
-        }
-      }
-
-    };
-    registerReceiver(broadcastReceiver, new IntentFilter("item_updated"));
-
 
     // TODO: implement the specs as defined below
     //    (find all UI components, hook them up, connect everything you need)
-  }
-  @Override
-  protected void onStop() {
-    super.onStop();
-    List<TodoItem> todoItemsList=  new ArrayList<>();
-    todoItemsList=this.dataBase.getCurrentItems();
   }
 
   @Override
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putSerializable("dataBase", this.dataBase);
+    outState.putSerializable("changed_app_state", saveState() );
   }
+
   @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    this.unregisterReceiver(broadcastReceiver);
+  protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    Serializable changed_state = savedInstanceState.getSerializable("changed_app_state");
+    loadState(changed_state);
+    itemAdapter.notifyDataSetChanged();
   }
 
 
+  public Serializable saveState() {
+    app_state state_database = new app_state();
+    state_database.set_state(this.dataBase, this.recyclerView, itemAdapter, this.dataBase.getCurrentItems());
+    return state_database;
+  }
+
+  public void loadState(Serializable prevState) {
+    if (!(prevState instanceof app_state)) {
+      return; // ignore
+    }
+    app_state casted = (app_state) prevState;
+    dataBase = casted.get_dataBase();
+    recyclerView = casted.get_recyclerView();
+    itemAdapter = casted.get_itemAdapter();
+    dataBase.change_many_items_states(casted.get_todoItemList());
+  }
+
+  private static class app_state implements Serializable {
+    TodoItemsDataBaseImpl dataBase;
+    private RecyclerView recyclerView;
+    private ItemAdapter itemAdapter;
+    private List<TodoItem> todoItemList = new ArrayList<>();
+
+
+    public void set_state(TodoItemsDataBase dataBase, RecyclerView recyclerView_other, ItemAdapter itemAdapter_other, List<TodoItem> todoItemList_other)
+    {
+      this.dataBase = new TodoItemsDataBaseImpl();
+      this.recyclerView = recyclerView_other;
+      this.recyclerView.setAdapter(itemAdapter);
+      this.dataBase.change_many_items_states(todoItemList_other);
+    }
+    public TodoItemsDataBaseImpl get_dataBase()
+    {
+      return this.dataBase;
+    }
+    public RecyclerView get_recyclerView()
+    {
+      return this.recyclerView;
+    }
+
+    public ItemAdapter get_itemAdapter()
+    {
+      return this.itemAdapter;
+    }
+    public List<TodoItem> get_todoItemList()
+    {
+      return todoItemList;
+    }
+  }
 
 }
-
-
 
 
 
