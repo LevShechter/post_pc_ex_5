@@ -2,4 +2,11 @@
     <string name="app_name">TodoItems</string>
     <string name="delete_item">delete_item</string>
     <string name="task">task</string>
+    <string name="currenttaskstatus">currentTaskStatus</string>
+    <string name="datelastchanged">dateLastChanged</string>
+    <string name="currentTaskStatus">currentTaskStatus</string>
+    <string name="description">description</string>
+    <string name="edit">edit</string>
+    <string name="edit_task">edit_task</string>
+    <string name="todo">TODO</string>
 </resources>

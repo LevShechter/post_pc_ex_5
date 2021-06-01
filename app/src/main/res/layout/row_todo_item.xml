@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,10 +12,10 @@
         android:id="@+id/check_box"
         android:layout_width="40dp"
         android:layout_height="50dp"
-        app:layout_constraintEnd_toStartOf="@+id/description"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/description"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
 
         />
     <TextView
@@ -23,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:singleLine="true"
-        android:textSize="30sp"
+        android:textSize="20sp"
         android:textColor="@color/blue_100"
         app:layout_constraintTop_toBottomOf="parent"
         app:layout_constraintBottom_toTopOf="parent"
@@ -37,7 +38,20 @@
         android:text="@string/delete_item"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.807"
+        app:layout_constraintStart_toEndOf="@+id/check_box"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/check_box"/>
+        app:layout_constraintVertical_bias="0.0" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/editTaskButton"
+        android:layout_width="83dp"
+        android:layout_height="36dp"
+        android:contentDescription="@string/todo"
+        android:text="@string/edit_task"
+        app:layout_constraintBottom_toBottomOf="@+id/delete_item_button"
+        app:layout_constraintEnd_toStartOf="@+id/delete_item_button"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/delete_item_button"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,13 +1,16 @@
 package exercise.android.reemh.todo_items;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.BroadcastReceiver;
-import android.os.Bundle;
-import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -20,17 +23,23 @@ public class MainActivity extends AppCompatActivity {
   public TodoItemsDataBase dataBase;
   RecyclerView recyclerView;
   ItemAdapter itemAdapter;
+  public ToDoListApplication toDoListApplication;
+  public BroadcastReceiver broadcastReceiver;
 
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    toDoListApplication = new ToDoListApplication(this);
 
     if (dataBase == null) {
       dataBase = new TodoItemsDataBaseImpl();
     }
     itemAdapter = new ItemAdapter(this, this.dataBase);
+    toDoListApplication.save_list_changes();
+    List<TodoItem> appList = toDoListApplication.todoList;
+    dataBase.change_many_items_states(appList);
 
     TextView editTextView = findViewById(R.id.editTextInsertTask);
     recyclerView = findViewById(R.id.recyclerTodoItemsList);
@@ -38,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
     recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
     recyclerView.setAdapter(itemAdapter);
     editTextView.setText("");
+    if (savedInstanceState != null)
+    {
+      String edited_string = savedInstanceState.getString("ToDoItemEdited");
+      editTextView.setText(edited_string);
+    }
 
     createTaskButton.setOnClickListener(view ->
     {
@@ -51,6 +65,24 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
+    broadcastReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        boolean is_changed = false;
+        is_changed = intent.getAction().equals("ToDoItemEdited");
+        if ( is_changed)
+        {
+          TodoItem editedItem = (TodoItem)intent.getSerializableExtra("ToDoItem");
+          dataBase.change_item_state(editedItem);
+          toDoListApplication.todoList = dataBase.getCurrentItems();
+          toDoListApplication.save_list_changes();
+          itemAdapter.notifyDataSetChanged();
+        }
+      }
+    };
+    IntentFilter intentFilter = new IntentFilter("ToDoItemEdited");
+    registerReceiver(broadcastReceiver, intentFilter);
+
     // TODO: implement the specs as defined below
     //    (find all UI components, hook them up, connect everything you need)
   }
@@ -58,18 +90,36 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putSerializable("changed_app_state", saveState() );
+    outState.putSerializable("ToDoItemEdited", this.dataBase );
   }
 
   @Override
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
-    Serializable changed_state = savedInstanceState.getSerializable("changed_app_state");
+    Serializable changed_state = savedInstanceState.getSerializable("ToDoItemEdited");
     loadState(changed_state);
     itemAdapter.notifyDataSetChanged();
   }
 
+  @Override
+  protected void onResume() {
+    super.onResume();
+    toDoListApplication.get_changes_todo_list();
+    List<TodoItem> appList = toDoListApplication.todoList;
+    dataBase.change_many_items_states(appList);
+  }
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    this.unregisterReceiver(broadcastReceiver);
+  }
 
+  @Override
+  protected void onStop() {
+    super.onStop();
+    toDoListApplication.todoList = this.dataBase.getCurrentItems();
+    toDoListApplication.save_list_changes();
+  }
   public Serializable saveState() {
     app_state state_database = new app_state();
     state_database.set_state(this.dataBase, this.recyclerView, itemAdapter, this.dataBase.getCurrentItems());

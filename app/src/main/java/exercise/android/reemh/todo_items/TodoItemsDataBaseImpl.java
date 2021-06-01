@@ -1,8 +1,8 @@
 package exercise.android.reemh.todo_items;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 // TODO: implement!
@@ -47,10 +47,11 @@ public class TodoItemsDataBaseImpl implements TodoItemsDataBase {
   public void change_item_state(TodoItem item_set) {
     int time = 0;
     for (int i = 0; i < this.TodoItemsList.size(); i++) {
-      int item_time = TodoItemsList.get(i).get_item_total_time();
-      if(time == item_set.get_item_total_time())
+      Date curItemDate = TodoItemsList.get(i).initTaskDate;
+      if (curItemDate.equals(item_set.initTaskDate))
       {
         this.TodoItemsList.set(i, item_set);
+        break;
       }
     }
     ItemsComparator itemsComparator = new ItemsComparator();
